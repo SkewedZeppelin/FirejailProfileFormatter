@@ -1,3 +1,19 @@
+/*This file is part of FirejailProfileFormatter.
+
+  FirejailProfileFormatter is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  FirejailProfileFormatter is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with FirejailProfileFormatter.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -36,7 +52,7 @@ public class Main {
                     quiet = true;
                 } else if(line.startsWith("blacklist") || line.startsWith("noblacklist")) {
                     profileNoBlacklist.add(line);
-                } else if(line.startsWith("include /etc/firejail/disable-")) {
+                } else if(line.startsWith("include /etc/firejail/disable-") || line.startsWith("# include /etc/firejail/disable-")) {
                     profileIncludes.add(line);
                 } else if(line.startsWith("mkfile") || line.startsWith("mkdir") || line.startsWith("whitelist")) {
                     profileWhitelist.add(line);
@@ -55,7 +71,7 @@ public class Main {
                     || line.startsWith("# No Blacklist Paths") || line.startsWith("# Options") || line.startsWith("# Profile")
                     || line.startsWith("# ipc-namespace") || line.startsWith("# Whitelist") || line.startsWith("# ##")
                     || line.replaceAll("\\s", "").equals("") || line.length() < 3 || line.equals("# silverlight")
-                    || line.startsWith("# include") || line.contains("experimental")) {
+                    || line.contains("experimental")) {
                     //ignore
                 } else {
                     if (line.startsWith("#")) {
@@ -92,7 +108,7 @@ public class Main {
             }
             //noblacklist
             if(profileNoBlacklist.size() > 0) {
-                profileNoBlacklist.sort(String::compareToIgnoreCase);
+                profileNoBlacklist.sort(String::compareTo);
                 for (String noblacklist : profileNoBlacklist) {
                     profileOut.println(noblacklist);
                 }
@@ -100,7 +116,7 @@ public class Main {
             //includes
             if(profileIncludes.size() > 0) {
                 profileOut.println();
-                profileIncludes.sort(String::compareToIgnoreCase);
+                profileIncludes.sort(String::compareTo);
                 for (String includes : profileIncludes) {
                     profileOut.println(includes);
                 }
@@ -108,7 +124,7 @@ public class Main {
             //whitelist
             if(profileWhitelist.size() > 0) {
                 profileOut.println();
-                profileWhitelist.sort(String::compareToIgnoreCase);
+                profileWhitelist.sort(String::compareTo);
                 for(String whitelist : profileWhitelist) {
                     profileOut.println(whitelist);
                 }
@@ -120,7 +136,7 @@ public class Main {
             //options
             if(profileOptions.size() > 0) {
                 profileOut.println();
-                profileOptions.sort(String::compareToIgnoreCase);
+                profileOptions.sort(String::compareTo);
                 for (String options : profileOptions) {
                     profileOut.println(options);
                 }
@@ -128,7 +144,7 @@ public class Main {
             //options private
             if(profileOptionsPrivate.size() > 0) {
                 profileOut.println();
-                profileOptionsPrivate.sort(String::compareToIgnoreCase);
+                profileOptionsPrivate.sort(String::compareTo);
                 for (String optionsPrivate : profileOptionsPrivate) {
                     profileOut.println(optionsPrivate);
                 }
@@ -136,7 +152,7 @@ public class Main {
             //options misc
             if(profileOptionsMisc.size() > 0) {
                 profileOut.println();
-                profileOptionsMisc.sort(String::compareToIgnoreCase);
+                profileOptionsMisc.sort(String::compareTo);
                 for (String optionsMisc : profileOptionsMisc) {
                     profileOut.println(optionsMisc);
                 }
@@ -144,7 +160,7 @@ public class Main {
             //alias
             if(profileExtends.size() > 0) {
                 profileOut.println();
-                profileExtends.sort(String::compareToIgnoreCase);
+                profileExtends.sort(String::compareTo);
                 for (String extend : profileExtends) {
                     profileOut.println(extend);
                 }
@@ -152,7 +168,7 @@ public class Main {
             //comments
             if(profileComments.size() > 0) {
                 profileOut.println();
-                profileComments.sort(String::compareToIgnoreCase);
+                profileComments.sort(String::compareTo);
                 profileOut.println("# CLOBBERED COMMENTS");
                 for (String comments : profileComments) {
                     profileOut.println(comments);
