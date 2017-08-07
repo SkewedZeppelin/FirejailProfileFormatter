@@ -58,7 +58,7 @@ public class Main {
                     profileWhitelist.add(line);
                 } else if(line.equals("include /etc/firejail/whitelist-common.inc")) {
                     isWhitelist = true;
-                } else if(line.startsWith("private") || line.startsWith("disable-mnt") || line.startsWith("# private")) {
+                } else if(line.startsWith("private") || line.startsWith("disable-mnt") || line.startsWith("# private") || line.startsWith("read-")) {
                     profileOptionsPrivate.add(line);
                 } else if(line.startsWith("noexec") || line.startsWith("memory-deny-write-execute")) {
                     profileOptionsMisc.add(line);
@@ -101,22 +101,25 @@ public class Main {
                 if (quiet) {
                     profileOut.println("quiet");
                 }
-                profileOut.println("# Persistent global definitions");
-                profileOut.println("include /etc/firejail/globals.local");
                 profileOut.println("# Persistent local customizations");
-                profileOut.println("include /etc/firejail/" + profileName + ".local\n");
+                profileOut.println("include /etc/firejail/" + profileName + ".local");
+                profileOut.println("# Persistent global definitions");
+                profileOut.println("include /etc/firejail/globals.local\n");
             }
             //noblacklist
             if(profileNoBlacklist.size() > 0) {
                 profileNoBlacklist.sort(String::compareTo);
-                for (String noblacklist : profileNoBlacklist) {
-                    profileOut.println(noblacklist);
+                for (int x = 0; x < profileNoBlacklist.size(); x++) {
+                    if(x > 0 && profileNoBlacklist.get(x - 1).startsWith("blacklist") && profileNoBlacklist.get(x).startsWith("noblacklist")) {
+                        profileOut.println();
+                    }
+                    profileOut.println(profileNoBlacklist.get(x));
                 }
             }
             //includes
             if(profileIncludes.size() > 0) {
                 profileOut.println();
-                profileIncludes.sort(String::compareTo);
+                profileIncludes.sort(Main::compareToIgnoreComment);
                 for (String includes : profileIncludes) {
                     profileOut.println(includes);
                 }
@@ -144,7 +147,7 @@ public class Main {
             //options private
             if(profileOptionsPrivate.size() > 0) {
                 profileOut.println();
-                profileOptionsPrivate.sort(String::compareTo);
+                profileOptionsPrivate.sort(Main::compareToIgnoreComment);
                 for (String optionsPrivate : profileOptionsPrivate) {
                     profileOut.println(optionsPrivate);
                 }
@@ -180,6 +183,10 @@ public class Main {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static int compareToIgnoreComment(String s1, String s2) {
+        return s1.replaceAll("# ", "").compareTo(s2.replaceAll("# ", ""));
     }
 
 }
