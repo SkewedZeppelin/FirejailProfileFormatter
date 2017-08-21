@@ -45,7 +45,9 @@ public class Main {
             ArrayList<String> profileOptionsMisc = new ArrayList<String>();
             ArrayList<String> profileExtends = new ArrayList<String>();
             ArrayList<String> profileComments = new ArrayList<String>();
+            int c = 0;
             while (profileReader.hasNext()) {
+                c++;
                 String line = profileReader.nextLine().trim();
                 line = line.replaceAll("#([^\\s-])", "# $1");
                 if(line.equals("quiet")) {
@@ -71,7 +73,7 @@ public class Main {
                     || line.startsWith("# No Blacklist Paths") || line.startsWith("# Options") || line.startsWith("# Profile")
                     || line.startsWith("# ipc-namespace") || line.startsWith("# Whitelist") || line.startsWith("# ##")
                     || line.replaceAll("\\s", "").equals("") || line.length() < 3 || line.equals("# silverlight")
-                    || line.contains("experimental")) {
+                    || line.contains("experimental") || line.startsWith("# Redirect")) {
                     //ignore
                 } else {
                     if (line.startsWith("#")) {
@@ -82,6 +84,7 @@ public class Main {
                 }
             }
             profileReader.close();
+            //System.out.println("Read " + c + " lines");
 
             //Rewrite the profile from the contents of the array
             String[] profileSplit = profile.toString().split("/");
