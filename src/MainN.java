@@ -7,8 +7,8 @@ import java.util.Scanner;
 
 public class MainN {
 
-    private static File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
-    private static File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
+    private static final File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
+    private static final File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
 
     public static void main(String[] args) {
         File[] allProfiles = profiles.listFiles();
@@ -17,9 +17,9 @@ public class MainN {
         }
     }
 
-    public static void fix(File profile) {
+    private static void fix(File profile) {
         try {
-            ArrayList<String> lines = new ArrayList<String>();
+            ArrayList<String> lines = new ArrayList<>();
             boolean hasOpt = false;
             Scanner profileReader = new Scanner(profile);
             while (profileReader.hasNext()) {
@@ -53,9 +53,7 @@ public class MainN {
                 }
                 profileOut.close();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

@@ -21,8 +21,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
-    private static File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
+    private static final File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
+    private static final File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
 
     public static void main(String[] args) {
         File[] allProfiles = profiles.listFiles();
@@ -31,20 +31,20 @@ public class Main {
         }
     }
 
-    public static void rewriteProfile(File profile) {
+    private static void rewriteProfile(File profile) {
         try {
             //Read the profile into an array
             Scanner profileReader = new Scanner(profile);
             boolean isWhitelist = false;
             boolean quiet = false;
-            ArrayList<String> profileNoBlacklist = new ArrayList<String>();
-            ArrayList<String> profileIncludes = new ArrayList<String>();
-            ArrayList<String> profileWhitelist = new ArrayList<String>();
-            ArrayList<String> profileOptions = new ArrayList<String>();
-            ArrayList<String> profileOptionsPrivate = new ArrayList<String>();
-            ArrayList<String> profileOptionsMisc = new ArrayList<String>();
-            ArrayList<String> profileExtends = new ArrayList<String>();
-            ArrayList<String> profileComments = new ArrayList<String>();
+            ArrayList<String> profileNoBlacklist = new ArrayList<>();
+            ArrayList<String> profileIncludes = new ArrayList<>();
+            ArrayList<String> profileWhitelist = new ArrayList<>();
+            ArrayList<String> profileOptions = new ArrayList<>();
+            ArrayList<String> profileOptionsPrivate = new ArrayList<>();
+            ArrayList<String> profileOptionsMisc = new ArrayList<>();
+            ArrayList<String> profileExtends = new ArrayList<>();
+            ArrayList<String> profileComments = new ArrayList<>();
             int c = 0;
             while (profileReader.hasNext()) {
                 c++;
@@ -181,7 +181,7 @@ public class Main {
         }
     }
 
-    public static int compareToIgnoreComment(String s1, String s2) {
+    private static int compareToIgnoreComment(String s1, String s2) {
         return s1.replaceAll("# ", "").compareTo(s2.replaceAll("# ", ""));
     }
 
