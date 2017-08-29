@@ -26,7 +26,7 @@ public class Main {
 
     public static void main(String[] args) {
         File[] allProfiles = profiles.listFiles();
-        for(File profile : allProfiles) {
+        for (File profile : allProfiles) {
             rewriteProfile(profile);
         }
     }
@@ -50,30 +50,25 @@ public class Main {
                 c++;
                 String line = profileReader.nextLine().trim();
                 line = line.replaceAll("#([^\\s-])", "# $1");
-                if(line.equals("quiet")) {
+                if (line.equals("quiet")) {
                     quiet = true;
-                } else if(line.startsWith("blacklist") || line.startsWith("noblacklist")) {
+                } else if (line.startsWith("blacklist") || line.startsWith("noblacklist")) {
                     profileNoBlacklist.add(line);
-                } else if(line.startsWith("include /etc/firejail/disable-") || line.startsWith("# include /etc/firejail/disable-")) {
+                } else if (line.startsWith("include /etc/firejail/disable-") || line.startsWith("# include /etc/firejail/disable-")) {
                     profileIncludes.add(line);
-                } else if(line.startsWith("mkfile") || line.startsWith("mkdir") || line.startsWith("whitelist")) {
+                } else if (line.startsWith("mkfile") || line.startsWith("mkdir") || line.startsWith("whitelist")) {
                     profileWhitelist.add(line);
-                } else if(line.equals("include /etc/firejail/whitelist-common.inc")) {
+                } else if (line.equals("include /etc/firejail/whitelist-common.inc")) {
                     isWhitelist = true;
-                } else if(line.startsWith("private") || line.startsWith("disable-mnt") || line.startsWith("# private") || line.startsWith("read-")) {
+                } else if (line.startsWith("private") || line.startsWith("disable-mnt") || line.startsWith("# private") || line.startsWith("read-")) {
                     profileOptionsPrivate.add(line);
-                } else if(line.startsWith("noexec") || line.startsWith("memory-deny-write-execute")) {
+                } else if (line.startsWith("noexec") || line.startsWith("memory-deny-write-execute")) {
                     profileOptionsMisc.add(line);
-                } else if(line.startsWith("include")) {
-                    if(line.contains(".profile")) {
+                } else if (line.startsWith("include")) {
+                    if (line.contains(".profile")) {
                         profileExtends.add(line);
                     }
-                } else if(line.startsWith("# Persistent") || line.startsWith("# This file") || line.startsWith("# Firejail")
-                    || line.contains("profile") && line.startsWith("#") || line.equals("") || line.startsWith("# Blacklist Paths")
-                    || line.startsWith("# No Blacklist Paths") || line.startsWith("# Options") || line.startsWith("# Profile")
-                    || line.startsWith("# ipc-namespace") || line.startsWith("# Whitelist") || line.startsWith("# ##")
-                    || line.replaceAll("\\s", "").equals("") || line.length() < 3 || line.equals("# silverlight")
-                    || line.contains("experimental") || line.startsWith("# Redirect")) {
+                } else if (line.startsWith("# Persistent") || line.startsWith("# This file") || line.startsWith("# Firejail") || line.contains("profile") && line.startsWith("#") || line.equals("") || line.startsWith("# Blacklist Paths") || line.startsWith("# No Blacklist Paths") || line.startsWith("# Options") || line.startsWith("# Profile") || line.startsWith("# ipc-namespace") || line.startsWith("# Whitelist") || line.startsWith("# ##") || line.replaceAll("\\s", "").equals("") || line.length() < 3 || line.equals("# silverlight") || line.contains("experimental") || line.startsWith("# Redirect")) {
                     //ignore
                 } else {
                     if (line.startsWith("#")) {
@@ -92,9 +87,7 @@ public class Main {
             File profileNew = new File(profilesNew.getPath() + "/" + profileSplit[profileSplit.length - 1]);
             PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
             //header XXX: VERIFY ALIAS HEADERS - grep "Firejail profile alias for" *.profile
-            if(profileExtends.size() == 1 && !profileExtends.get(0).contains("default.profile")
-                && !profileExtends.get(0).contains("electron.profile") && !profileExtends.get(0).contains("firefox.profile")
-                && !(profileOptions.size() > 2)) {
+            if (profileExtends.size() == 1 && !profileExtends.get(0).contains("default.profile") && !profileExtends.get(0).contains("electron.profile") && !profileExtends.get(0).contains("firefox.profile") && !(profileOptions.size() > 2)) {
                 String alias = profileExtends.get(0).split("/")[profileExtends.get(0).split("/").length - 1].split(".profile")[0];
                 profileOut.println("# Firejail profile alias for " + alias);
                 profileOut.println("# This file is overwritten after every install/update\n");
@@ -110,17 +103,17 @@ public class Main {
                 profileOut.println("include /etc/firejail/globals.local\n");
             }
             //noblacklist
-            if(profileNoBlacklist.size() > 0) {
+            if (profileNoBlacklist.size() > 0) {
                 profileNoBlacklist.sort(String::compareTo);
                 for (int x = 0; x < profileNoBlacklist.size(); x++) {
-                    if(x > 0 && profileNoBlacklist.get(x - 1).startsWith("blacklist") && profileNoBlacklist.get(x).startsWith("noblacklist")) {
+                    if (x > 0 && profileNoBlacklist.get(x - 1).startsWith("blacklist") && profileNoBlacklist.get(x).startsWith("noblacklist")) {
                         profileOut.println();
                     }
                     profileOut.println(profileNoBlacklist.get(x));
                 }
             }
             //includes
-            if(profileIncludes.size() > 0) {
+            if (profileIncludes.size() > 0) {
                 profileOut.println();
                 profileIncludes.sort(Main::compareToIgnoreComment);
                 for (String includes : profileIncludes) {
@@ -128,19 +121,19 @@ public class Main {
                 }
             }
             //whitelist
-            if(profileWhitelist.size() > 0) {
+            if (profileWhitelist.size() > 0) {
                 profileOut.println();
                 profileWhitelist.sort(String::compareTo);
-                for(String whitelist : profileWhitelist) {
+                for (String whitelist : profileWhitelist) {
                     profileOut.println(whitelist);
                 }
                 isWhitelist = true;
             }
-            if(isWhitelist) {
+            if (isWhitelist) {
                 profileOut.println("include /etc/firejail/whitelist-common.inc");
             }
             //options
-            if(profileOptions.size() > 0) {
+            if (profileOptions.size() > 0) {
                 profileOut.println();
                 profileOptions.sort(String::compareTo);
                 for (String options : profileOptions) {
@@ -148,7 +141,7 @@ public class Main {
                 }
             }
             //options private
-            if(profileOptionsPrivate.size() > 0) {
+            if (profileOptionsPrivate.size() > 0) {
                 profileOut.println();
                 profileOptionsPrivate.sort(Main::compareToIgnoreComment);
                 for (String optionsPrivate : profileOptionsPrivate) {
@@ -156,7 +149,7 @@ public class Main {
                 }
             }
             //options misc
-            if(profileOptionsMisc.size() > 0) {
+            if (profileOptionsMisc.size() > 0) {
                 profileOut.println();
                 profileOptionsMisc.sort(String::compareTo);
                 for (String optionsMisc : profileOptionsMisc) {
@@ -164,7 +157,7 @@ public class Main {
                 }
             }
             //alias
-            if(profileExtends.size() > 0) {
+            if (profileExtends.size() > 0) {
                 profileOut.println();
                 profileExtends.sort(String::compareTo);
                 for (String extend : profileExtends) {
@@ -172,7 +165,7 @@ public class Main {
                 }
             }
             //comments
-            if(profileComments.size() > 0) {
+            if (profileComments.size() > 0) {
                 profileOut.println();
                 profileComments.sort(String::compareTo);
                 profileOut.println("# CLOBBERED COMMENTS");
@@ -183,7 +176,7 @@ public class Main {
             //finish
             profileOut.close();
             System.out.println("Rewrote " + profileName);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
