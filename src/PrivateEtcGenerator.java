@@ -113,7 +113,7 @@ public class PrivateEtcGenerator {
                 if (line.contains("private-") && line.contains("java") || line.equals("noblacklist ${PATH}/java") || line.equals("noblacklist ${HOME}/.java")) {
                     hasSpecialJava = true;
                 }
-                if (line.contains("private-") && line.contains("mono") || line.equals("noblacklist ${HOME}/.config/mono")) {
+                if (line.contains("private-") && line.contains("mono") || line.equals("noblacklist ${HOME}/.config/mono") || profileName.contains("pdfmod")) {
                     hasSpecialMono = true;
                 }
                 if (line.contains("private-etc") && line.contains("sword") || line.equals("noblacklist ${HOME}/.sword")) {
@@ -300,8 +300,8 @@ public class PrivateEtcGenerator {
             case "ark":
                 extras = ",smb.conf,samba";
                 break;
-            case "onionshare":
-                extras = ",tor";
+            case "pitivi":
+                extras = ",matplotlibrc";
                 break;
         }
         return extras;
@@ -309,7 +309,8 @@ public class PrivateEtcGenerator {
 
     private static final List<String> profilesTested = Arrays.asList("atril", "audacity", "bleachbit", "darktable", "eom", "gimp", "gnome-2048", "gnome-chess"
         , "gucharmap", "inkscape", "liferea", "lollypop", "mate-calc", "mate-color-select", "meld", "minetest", "onionshare", "parole", "picard", "pluma"
-        , "scribus", "libreoffice", "simple-scan", "soundconverter", "torbrowser-launcher");
+        , "scribus", "libreoffice", "simple-scan", "soundconverter", "torbrowser-launcher", "transmission-gtk", "xonotic", "wget", "youtube-dl", "pdfmod"
+        , "pitivi");
 
     //Broken: pdfmod, pitivi
 
