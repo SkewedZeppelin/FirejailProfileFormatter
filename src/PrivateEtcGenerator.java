@@ -53,11 +53,25 @@ public class PrivateEtcGenerator {
             boolean hasSpecialSword = false;
             boolean hasSpecialSelf = false;
 
+            boolean isGtk = true;
+            boolean isQt = true;
+
             ArrayList<String> rebuiltProfile = new ArrayList<>();
             Scanner profileReader = new Scanner(profile);
             while (profileReader.hasNext()) {
                 String line = profileReader.nextLine();
+                String lineLower = line.toLowerCase();
                 rebuiltProfile.add(line);
+
+                if(line.startsWith("# Description:") && (lineLower.contains("gtk") || lineLower.contains("gnome"))
+                    || profileName.contains("-gtk") || profileName.startsWith("gnome-")) {
+                    isQt = false;
+                }
+
+                if(line.startsWith("# Description:") && (lineLower.contains("qt") || lineLower.contains("kde"))
+                    || profileName.contains("-qt")) {
+                    isGtk = false;
+                }
 
                 if (line.equals("nosound")) {
                     hasSound = false;
@@ -102,7 +116,7 @@ public class PrivateEtcGenerator {
             profileReader.close();
             System.out.println("\t\tRead profile");
 
-            String generatedEtc = generateEtc(hasNetworking, hasSound, hasGui, has3d, hasDbus, hasGroups, hasAllusers);
+            String generatedEtc = generateEtc(isGtk, isQt, hasNetworking, hasSound, hasGui, has3d, hasDbus, hasGroups, hasAllusers) + getSpecificExtras(profileName);
             if (generatedEtc.length() > 0 && !hasSpecialIgnore) {
                 if (hasSpecialTor) {
                     generatedEtc += ",tor";
@@ -150,7 +164,7 @@ public class PrivateEtcGenerator {
         }
     }
 
-    private static String generateEtc(boolean hasNetworking, boolean hasSound, boolean hasGui, boolean has3d, boolean hasDbus, boolean hasGroups, boolean hasAllusers) {
+    private static String generateEtc(boolean isGtk, boolean isQt, boolean hasNetworking, boolean hasSound, boolean hasGui, boolean has3d, boolean hasDbus, boolean hasGroups, boolean hasAllusers) {
         String privateEtc = "private-etc ";
         Set<String> etcContents = new HashSet<>();
 
@@ -192,11 +206,15 @@ public class PrivateEtcGenerator {
         }
         if (hasGui) {
             etcContents.add("fonts");
-            etcContents.add("dconf");
-            etcContents.add("gtk*");
-            etcContents.add("kde*rc");
             etcContents.add("pango");
             etcContents.add("X11");
+            if(isGtk) {
+                etcContents.add("dconf");
+                etcContents.add("gtk*");
+            }
+            if(isQt) {
+                etcContents.add("kde*rc");
+            }
         }
         if (has3d) {
             etcContents.add("drirc");
@@ -240,5 +258,26 @@ public class PrivateEtcGenerator {
         sorted = sorted.substring(1, sorted.length()); //Remove first comma
 
         return sorted;
+    }
+
+    private static String getSpecificExtras(String profile) {
+        String extras = "";
+
+        switch (profile) {
+            case "dnsmasq":
+                extras = ",dnsmasq.conf,dnsmasq.conf.d";
+                break;
+            case "ardour5":
+                extras = ",ardour4";
+                break;
+            case "ark":
+                extras = ",smb.conf,samba";
+                break;
+            case "gwenview":
+                extras = ",gimp";
+                break;
+        }
+
+        return extras;
     }
 }
