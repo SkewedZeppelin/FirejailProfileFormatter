@@ -92,7 +92,7 @@ public class PrivateEtcGenerator {
                 if (line.equals("quiet") /*|| line.equals("noblacklist /sbin")*/ || line.equals("private") || line.equals("blacklist /tmp/.X11-unix") || line.equals("x11 none")) {
                     hasGui = false;
                 }
-                if(profileName.equals("gucharmap")) {
+                if(profileName.equals("gucharmap") || profileName.equals("gnome-calculator")) {
                     hasGui = true;
                 }
                 if (line.equals("no3d")) {
@@ -241,6 +241,7 @@ public class PrivateEtcGenerator {
             }
             if(isQt) {
                 etcContents.add("kde*rc");
+                etcContents.add("Trolltech.conf");
             }
         }
         if (has3d) {
@@ -303,6 +304,11 @@ public class PrivateEtcGenerator {
             case "pitivi":
                 extras = ",matplotlibrc";
                 break;
+            case "gnome-clocks":
+            case "gnome-maps":
+                extras = ",geoclue";
+            case "sqlitebrowser":
+                extras = ",machine-id";
         }
         return extras;
     }
@@ -310,9 +316,10 @@ public class PrivateEtcGenerator {
     private static final List<String> profilesTested = Arrays.asList("atril", "audacity", "bleachbit", "darktable", "eom", "gimp", "gnome-2048", "gnome-chess"
         , "gucharmap", "inkscape", "liferea", "lollypop", "mate-calc", "mate-color-select", "meld", "minetest", "onionshare", "parole", "picard", "pluma"
         , "scribus", "libreoffice", "simple-scan", "soundconverter", "torbrowser-launcher", "transmission-gtk", "xonotic", "wget", "youtube-dl", "pdfmod"
-        , "pitivi");
+        , "pitivi", "baobab", "electrum", "epiphany", "evince", "gedit", "gitg", "gnome-calculator", "gnome-clocks", "gnome-contacts", "gnome-font-viewer"
+        , "gnome-maps", "gnome-photos", "hexchat", "idea.sh", "mumble", "totem", "wireshark", "sqlitebrowser");
 
-    //Broken: pdfmod, pitivi
+    //Broken: gnome-logs
 
     private static String shouldEnable(int hadPrivateEtc, String profileName) {
         if(hadPrivateEtc == 2 || profilesTested.contains(profileName)) {
