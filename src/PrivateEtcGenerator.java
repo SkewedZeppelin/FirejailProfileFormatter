@@ -17,7 +17,6 @@ public class PrivateEtcGenerator {
     private static void fix(File profile) {
         String[] profileSplit = profile.toString().split("/");
         String profileName = profileSplit[profileSplit.length - 1].replaceAll(".profile", "").toLowerCase();
-        String profileNameReduced = profileName.substring(0, profileName.length() - 1);
         File profileNew = new File(profilesNew.getPath() + "/" + profileSplit[profileSplit.length - 1]);
 
         System.out.println("\tProcessing " + profileName);
@@ -33,6 +32,9 @@ public class PrivateEtcGenerator {
 
             boolean hasSpecialIgnore = false;
             boolean hasSpecialTor = false;
+            boolean hasSpecialJava = false;
+            boolean hasSpecialMono = false;
+            boolean hasSpecialSword = false;
             boolean hasSpecialSelf = false;
 
             ArrayList<String> rebuiltProfile = new ArrayList<>();
@@ -62,10 +64,19 @@ public class PrivateEtcGenerator {
                 if(line.equals("allusers")) {
                     hasAllusers = true;
                 }
-                if(line.contains("private-bin") && line.contains("tor,")) {
+                if(line.contains("private-") && line.contains("tor")) {
                     hasSpecialTor = true;
                 }
-                if(line.contains("private-") && (profileNameReduced.length() >= 4 && line.contains(profileNameReduced))) {
+                if(line.contains("private-") && line.contains("java")) {
+                    hasSpecialJava = true;
+                }
+                if(line.contains("private-") && line.contains("mono")) {
+                    hasSpecialMono = true;
+                }
+                if(line.contains("private-etc") && line.contains("sword")) {
+                    hasSpecialSword = true;
+                }
+                if(line.contains("private-etc") && (profileName.length() >= 3 && line.contains(profileName))) {
                     hasSpecialSelf = true;
                 }
                 if(line.contains("# Redirect")) {
@@ -80,8 +91,17 @@ public class PrivateEtcGenerator {
                 if(hasSpecialTor) {
                     generatedEtc += ",tor";
                 }
+                if(hasSpecialJava) {
+                    generatedEtc += ",java*";
+                }
+                if(hasSpecialMono) {
+                    generatedEtc += ",mono";
+                }
+                if(hasSpecialSword) {
+                    generatedEtc += ",sword*";
+                }
                 if(hasSpecialSelf) {
-                    generatedEtc += "," + profileNameReduced + "*";
+                    generatedEtc += "," + profileName;
                 }
 
                 boolean addedNewEtc = false;
@@ -121,6 +141,7 @@ public class PrivateEtcGenerator {
         etcContents.add("localtime");
         etcContents.add("alternatives");
         etcContents.add("mime-types");
+        etcContents.add("magic*");
         etcContents.add("xdg");
 
         etcContents.add("os-release");
@@ -128,6 +149,8 @@ public class PrivateEtcGenerator {
 
         etcContents.add("passwd");
         etcContents.add("selinux");
+
+        //TODO Handle the following: mtab, smb.conf, samba, cups, adobe, mailcap
 
         if(hasNetworking) {
             etcContents.add("ca-certificates");
@@ -150,6 +173,7 @@ public class PrivateEtcGenerator {
         if(hasGui) {
             etcContents.add("fonts");
             etcContents.add("gtk*");
+            etcContents.add("kde*rc");
             etcContents.add("pango");
             etcContents.add("X11");
         }
@@ -160,6 +184,8 @@ public class PrivateEtcGenerator {
         }
         if(hasDbus) {
             etcContents.add("dbus-1");
+            etcContents.add("dconf");
+            etcContents.add("machine-id");
         }
         if(hasGroups) {
             etcContents.add("group");
