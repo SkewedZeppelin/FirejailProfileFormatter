@@ -51,10 +51,13 @@ public class PrivateEtcGenerator {
             boolean hasSpecialJava = false;
             boolean hasSpecialMono = false;
             boolean hasSpecialSword = false;
+            boolean hasSpecialGimp = false;
             boolean hasSpecialSelf = false;
 
             boolean isGtk = true;
             boolean isQt = true;
+
+            int hadPrivateEtc = 0;
 
             ArrayList<String> rebuiltProfile = new ArrayList<>();
             Scanner profileReader = new Scanner(profile);
@@ -62,6 +65,13 @@ public class PrivateEtcGenerator {
                 String line = profileReader.nextLine();
                 String lineLower = line.toLowerCase();
                 rebuiltProfile.add(line);
+
+                if(line.startsWith("#private-etc")) {
+                    hadPrivateEtc = 1;
+                }
+                if(line.startsWith("private-etc")) {
+                    hadPrivateEtc = 2;
+                }
 
                 if(line.startsWith("# Description:") && (lineLower.contains("gtk") || lineLower.contains("gnome"))
                     || profileName.contains("-gtk") || profileName.startsWith("gnome-")) {
@@ -79,8 +89,11 @@ public class PrivateEtcGenerator {
                 if (line.equals("net none") || line.equals("protocol unix")) {
                     hasNetworking = false;
                 }
-                if (line.equals("quiet") || line.equals("noblacklist /sbin") || line.equals("private") || line.equals("blacklist /tmp/.X11-unix") || line.equals("x11 none")) {
+                if (line.equals("quiet") /*|| line.equals("noblacklist /sbin")*/ || line.equals("private") || line.equals("blacklist /tmp/.X11-unix") || line.equals("x11 none")) {
                     hasGui = false;
+                }
+                if(profileName.equals("gucharmap")) {
+                    hasGui = true;
                 }
                 if (line.equals("no3d")) {
                     has3d = false;
@@ -94,7 +107,7 @@ public class PrivateEtcGenerator {
                 if (line.equals("allusers")) {
                     hasAllusers = true;
                 }
-                if (line.contains("private-") && line.contains("tor")) {
+                if (line.contains("private-") && line.contains("tor") || profileName.contains("onionshare")) {
                     hasSpecialTor = true;
                 }
                 if (line.contains("private-") && line.contains("java") || line.equals("noblacklist ${PATH}/java") || line.equals("noblacklist ${HOME}/.java")) {
@@ -105,6 +118,9 @@ public class PrivateEtcGenerator {
                 }
                 if (line.contains("private-etc") && line.contains("sword") || line.equals("noblacklist ${HOME}/.sword")) {
                     hasSpecialSword = true;
+                }
+                if (line.contains("private-") && lineLower.contains("gimp") || line.startsWith("noblacklist") && lineLower.contains("gimp")) {
+                    hasSpecialGimp = true;
                 }
                 if (line.contains("private-etc") && (profileName.length() >= 3 && line.contains(profileName))) {
                     hasSpecialSelf = true;
@@ -130,9 +146,18 @@ public class PrivateEtcGenerator {
                 if (hasSpecialSword) {
                     generatedEtc += ",sword*";
                 }
+                if (hasSpecialGimp) {
+                    generatedEtc += ",gimp";
+                }
                 if (hasSpecialSelf) {
                     generatedEtc += "," + profileName;
                 }
+
+                //WORKAROUND NO PRIVATE-ETC GLOBBING
+                generatedEtc = generatedEtc.replace("sword*", "sword,sword.conf");
+                generatedEtc = generatedEtc.replace("java*", "java.conf,java-10-openjdk,java-9-openjdk,java-8-openjdk,java-7-openjdk");
+
+                generatedEtc = shouldEnable(hadPrivateEtc, profileName) + generatedEtc;
 
                 boolean addedNewEtc = false;
                 PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
@@ -180,6 +205,7 @@ public class PrivateEtcGenerator {
         etcContents.add("lsb-release");
 
         etcContents.add("passwd");
+        //etcContents.add("security");
         etcContents.add("selinux");
 
         //TODO Handle the following: mtab, smb.conf, samba, cups, adobe, mailcap
@@ -210,6 +236,7 @@ public class PrivateEtcGenerator {
             etcContents.add("X11");
             if(isGtk) {
                 etcContents.add("dconf");
+                etcContents.add("gconf");
                 etcContents.add("gtk*");
             }
             if(isQt) {
@@ -218,6 +245,7 @@ public class PrivateEtcGenerator {
         }
         if (has3d) {
             etcContents.add("drirc");
+            etcContents.add("glvnd");
             etcContents.add("bumblebee");
             //etcContents.add("nvidia");
         }
@@ -262,7 +290,6 @@ public class PrivateEtcGenerator {
 
     private static String getSpecificExtras(String profile) {
         String extras = "";
-
         switch (profile) {
             case "dnsmasq":
                 extras = ",dnsmasq.conf,dnsmasq.conf.d";
@@ -273,11 +300,23 @@ public class PrivateEtcGenerator {
             case "ark":
                 extras = ",smb.conf,samba";
                 break;
-            case "gwenview":
-                extras = ",gimp";
+            case "onionshare":
+                extras = ",tor";
                 break;
         }
-
         return extras;
+    }
+
+    private static final List<String> profilesTested = Arrays.asList("atril", "audacity", "bleachbit", "darktable", "eom", "gimp", "gnome-2048", "gnome-chess"
+        , "gucharmap", "inkscape", "liferea", "lollypop", "mate-calc", "mate-color-select", "meld", "minetest", "onionshare", "parole", "picard", "pluma"
+        , "scribus", "libreoffice", "simple-scan", "soundconverter", "torbrowser-launcher");
+
+    //Broken: pdfmod, pitivi
+
+    private static String shouldEnable(int hadPrivateEtc, String profileName) {
+        if(hadPrivateEtc == 2 || profilesTested.contains(profileName)) {
+            return "";
+        }
+        return "#";
     }
 }
