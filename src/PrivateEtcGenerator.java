@@ -56,6 +56,7 @@ public class PrivateEtcGenerator {
 
             boolean isGtk = true;
             boolean isQt = true;
+            boolean isKde = false;
 
             int hadPrivateEtc = 0;
 
@@ -73,14 +74,27 @@ public class PrivateEtcGenerator {
                     hadPrivateEtc = 2;
                 }
 
-                if(line.startsWith("# Description:") && (lineLower.contains("gtk") || lineLower.contains("gnome"))
-                    || profileName.contains("-gtk") || profileName.startsWith("gnome-")) {
+                if((line.startsWith("# Description:") && (lineLower.contains("gnome") || lineLower.contains("gtk")))
+                    || profileName.startsWith("gnome-")
+                    || profileName.endsWith("-gtk")) {
+                    isGtk = true;
+                    isKde = false;
                     isQt = false;
                 }
 
-                if(line.startsWith("# Description:") && (lineLower.contains("qt") || lineLower.contains("kde"))
-                    || profileName.contains("-qt")) {
+                if((line.startsWith("# Description:") && lineLower.contains("qt"))
+                    || profileName.endsWith("-qt")) {
                     isGtk = false;
+                    isQt = true;
+                    isKde = false;
+                }
+
+                if((line.startsWith("# Description:") && lineLower.contains("kde"))
+                    || (line.contains("private-") && line.contains("kde"))
+                    || (line.contains("noblacklist") && lineLower.contains("/.kde"))) {
+                    isGtk = false;
+                    isQt = true;
+                    isKde = true;
                 }
 
                 if (line.equals("nosound")) {
@@ -135,7 +149,7 @@ public class PrivateEtcGenerator {
             profileReader.close();
             System.out.println("\t\tRead profile");
 
-            String generatedEtc = generateEtc(isGtk, isQt, hasNetworking, hasSound, hasGui, has3d, hasDbus, hasGroups, hasAllusers) + getSpecificExtras(profileName);
+            String generatedEtc = generateEtc(isGtk, isQt, isKde, hasNetworking, hasSound, hasGui, has3d, hasDbus, hasGroups, hasAllusers) + getSpecificExtras(profileName);
             if (generatedEtc.length() > 0 && !hasSpecialIgnore) {
                 if (hasSpecialTor) {
                     generatedEtc += ",tor";
@@ -196,7 +210,7 @@ public class PrivateEtcGenerator {
         }
     }
 
-    private static String generateEtc(boolean isGtk, boolean isQt, boolean hasNetworking, boolean hasSound, boolean hasGui, boolean has3d, boolean hasDbus, boolean hasGroups, boolean hasAllusers) {
+    private static String generateEtc(boolean isGtk, boolean isQt, boolean isKde, boolean hasNetworking, boolean hasSound, boolean hasGui, boolean has3d, boolean hasDbus, boolean hasGroups, boolean hasAllusers) {
         String privateEtc = "private-etc ";
         Set<String> etcContents = new HashSet<>();
 
@@ -213,6 +227,7 @@ public class PrivateEtcGenerator {
 
         etcContents.add("passwd");
         //etcContents.add("security");
+        //etcContents.add("system-fips");
         etcContents.add("selinux");
 
         //TODO Handle the following: mtab, smb.conf, samba, cups, adobe, mailcap
@@ -222,7 +237,7 @@ public class PrivateEtcGenerator {
             etcContents.add("ssl");
             etcContents.add("pki");
             etcContents.add("crypto-policies");
-            etcContents.add("nssswitch.conf");
+            etcContents.add("nsswitch.conf");
             etcContents.add("resolv.conf");
             etcContents.add("host*");
             etcContents.add("protocols");
@@ -247,8 +262,11 @@ public class PrivateEtcGenerator {
                 etcContents.add("gtk*");
             }
             if(isQt) {
-                etcContents.add("kde*rc");
                 etcContents.add("Trolltech.conf");
+                //etcContents.add("sni-qt.conf");
+            }
+            if(isKde) {
+                etcContents.add("kde*rc");
             }
         }
         if (has3d) {
@@ -314,8 +332,13 @@ public class PrivateEtcGenerator {
             case "gnome-clocks":
             case "gnome-maps":
                 extras = ",geoclue";
+                break;
             case "sqlitebrowser":
                 extras = ",machine-id";
+                break;
+            case "pybitmessage":
+                extras = ",PyBitMessage,PyBitMessage.conf";
+                break;
         }
         return extras;
     }
@@ -324,7 +347,8 @@ public class PrivateEtcGenerator {
         , "gucharmap", "inkscape", "liferea", "lollypop", "mate-calc", "mate-color-select", "meld", "minetest", "onionshare", "parole", "picard", "pluma"
         , "scribus", "libreoffice", "simple-scan", "soundconverter", "torbrowser-launcher", "transmission-gtk", "xonotic", "wget", "youtube-dl", "pdfmod"
         , "pitivi", "baobab", "electrum", "epiphany", "evince", "gedit", "gitg", "gnome-calculator", "gnome-clocks", "gnome-contacts", "gnome-font-viewer"
-        , "gnome-maps", "gnome-photos", "hexchat", "idea.sh", "mumble", "totem", "wireshark", "sqlitebrowser");
+        , "gnome-maps", "gnome-photos", "hexchat", "idea.sh", "mumble", "totem", "wireshark", "sqlitebrowser", "android-studio", "apktool", "arch-audit"
+        , "arm", "nyx", "dex2jar", "dino", "jd-gui", "obs", "remmina", "pithos", "ppsspp", "shellcheck", "sdat2img", "virtualbox", "zaproxy", "steam");
 
     //Broken: gnome-logs
 
