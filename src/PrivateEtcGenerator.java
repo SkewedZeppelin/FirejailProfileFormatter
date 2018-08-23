@@ -92,6 +92,9 @@ public class PrivateEtcGenerator {
                 if (line.equals("quiet") /*|| line.equals("noblacklist /sbin")*/ || line.equals("private") || line.equals("blacklist /tmp/.X11-unix") || line.equals("x11 none")) {
                     hasGui = false;
                 }
+                if(profileName.equals("arm") || profileName.equals("nyx")) {
+                    hasGui = false;
+                }
                 if(profileName.equals("gucharmap") || profileName.equals("gnome-calculator")) {
                     hasGui = true;
                 }
@@ -125,7 +128,7 @@ public class PrivateEtcGenerator {
                 if (line.contains("private-etc") && (profileName.length() >= 3 && line.contains(profileName))) {
                     hasSpecialSelf = true;
                 }
-                if (line.contains("Redirect")) {
+                if (lineLower.contains("redirect")) {
                     hasSpecialIgnore = true;
                 }
             }
@@ -163,12 +166,12 @@ public class PrivateEtcGenerator {
                 PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
                 String lastLine = "";
                 for (String newLine : rebuiltProfile) {
-                    if ((newLine.contains("private-etc") || lastLine.equals("private-dev"))) {
+                    if ((newLine.contains("private-etc") || lastLine.contains("private-dev") || newLine.contains("private-tmp") || newLine.contains("noexec") || newLine.contains("read-only"))) {
                         if(!addedNewEtc) {
                             profileOut.println(generatedEtc);
                             addedNewEtc = true;
                         }
-                        if(lastLine.equals("private-dev") && !newLine.contains("private-etc")) {
+                        if(!newLine.contains("private-etc")) {
                             profileOut.println(newLine);
                         }
                     } else {
@@ -176,8 +179,12 @@ public class PrivateEtcGenerator {
                     }
                     lastLine = newLine;
                 }
+                String prefix = "\n";
+                if(lastLine.contains("disable") || lastLine.contains("private")) {
+                    prefix = "";
+                }
                 if (!addedNewEtc) {
-                    profileOut.println(generatedEtc);
+                    profileOut.println(prefix + generatedEtc);
                 }
                 profileOut.close();
                 System.out.println("\t\tWrote profile");
