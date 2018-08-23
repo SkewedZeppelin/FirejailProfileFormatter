@@ -65,7 +65,7 @@ public class PrivateEtcGenerator {
                 if (line.equals("net none") || line.equals("protocol unix")) {
                     hasNetworking = false;
                 }
-                if (line.equals("noblacklist /sbin") || line.equals("private") || line.equals("blacklist /tmp/.X11-unix")) {
+                if (line.equals("quiet") || line.equals("noblacklist /sbin") || line.equals("private") || line.equals("blacklist /tmp/.X11-unix") || line.equals("x11 none")) {
                     hasGui = false;
                 }
                 if (line.equals("no3d")) {
@@ -83,19 +83,19 @@ public class PrivateEtcGenerator {
                 if (line.contains("private-") && line.contains("tor")) {
                     hasSpecialTor = true;
                 }
-                if (line.contains("private-") && line.contains("java")) {
+                if (line.contains("private-") && line.contains("java") || line.equals("noblacklist ${PATH}/java") || line.equals("noblacklist ${HOME}/.java")) {
                     hasSpecialJava = true;
                 }
-                if (line.contains("private-") && line.contains("mono")) {
+                if (line.contains("private-") && line.contains("mono") || line.equals("noblacklist ${HOME}/.config/mono")) {
                     hasSpecialMono = true;
                 }
-                if (line.contains("private-etc") && line.contains("sword")) {
+                if (line.contains("private-etc") && line.contains("sword") || line.equals("noblacklist ${HOME}/.sword")) {
                     hasSpecialSword = true;
                 }
                 if (line.contains("private-etc") && (profileName.length() >= 3 && line.contains(profileName))) {
                     hasSpecialSelf = true;
                 }
-                if (line.contains("# Redirect")) {
+                if (line.contains("Redirect")) {
                     hasSpecialIgnore = true;
                 }
             }
@@ -124,14 +124,15 @@ public class PrivateEtcGenerator {
                 PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
                 String lastLine = "";
                 for (String newLine : rebuiltProfile) {
-                    if (!addedNewEtc && newLine.contains("private-etc ")) {
-                        profileOut.println(generatedEtc);
-                        addedNewEtc = true;
-                    } else {
-                        if (!addedNewEtc && lastLine.equals("private-dev")) {
+                    if ((newLine.contains("private-etc") || lastLine.equals("private-dev"))) {
+                        if(!addedNewEtc) {
                             profileOut.println(generatedEtc);
                             addedNewEtc = true;
                         }
+                        if(lastLine.equals("private-dev") && !newLine.contains("private-etc")) {
+                            profileOut.println(newLine);
+                        }
+                    } else {
                         profileOut.println(newLine);
                     }
                     lastLine = newLine;
@@ -156,9 +157,9 @@ public class PrivateEtcGenerator {
         etcContents.add("ld.so.*");
         etcContents.add("locale*");
         etcContents.add("localtime");
-        etcContents.add("magic*");
+        //etcContents.add("magic*");
         etcContents.add("alternatives");
-        etcContents.add("mime-types");
+        etcContents.add("mime.types");
         etcContents.add("xdg");
 
         etcContents.add("os-release");
@@ -177,8 +178,10 @@ public class PrivateEtcGenerator {
             etcContents.add("nssswitch.conf");
             etcContents.add("resolv.conf");
             etcContents.add("host*");
+            etcContents.add("protocols");
             etcContents.add("services");
-            etcContents.add("gai.conf");
+            etcContents.add("rpc");
+            //etcContents.add("gai.conf");
             //etcContents.add("proxychains.conf");
         }
         if (hasSound) {
@@ -189,6 +192,7 @@ public class PrivateEtcGenerator {
         }
         if (hasGui) {
             etcContents.add("fonts");
+            etcContents.add("dconf");
             etcContents.add("gtk*");
             etcContents.add("kde*rc");
             etcContents.add("pango");
@@ -197,11 +201,10 @@ public class PrivateEtcGenerator {
         if (has3d) {
             etcContents.add("drirc");
             etcContents.add("bumblebee");
-            etcContents.add("nvidia");
+            //etcContents.add("nvidia");
         }
         if (hasDbus) {
             etcContents.add("dbus-1");
-            etcContents.add("dconf");
             etcContents.add("machine-id");
         }
         if (hasGroups) {
@@ -212,6 +215,14 @@ public class PrivateEtcGenerator {
         }
 
         privateEtc += generateEtctSD(etcContents);
+
+        //WORKAROUND NO PRIVATE-ETC GLOBBING
+        privateEtc = privateEtc.replace("ld.so.*", "ld.so.cache,ld.so.preload,ld.so.conf,ld.so.conf.d");
+        privateEtc = privateEtc.replace("locale*", "locale,locale.alias,locale.conf");
+        privateEtc = privateEtc.replace("magic*", "magic,magic.mgc");
+        privateEtc = privateEtc.replace("host*", "hosts,host.conf,hostname");
+        privateEtc = privateEtc.replace("gtk*", "gtk-2.0,gtk-3.0");
+        privateEtc = privateEtc.replace("kde*rc", "kde4rc,kde5rc");
 
         return privateEtc;
     }
