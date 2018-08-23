@@ -25,7 +25,7 @@ public class MainWNB {
             while (profileReader.hasNext()) {
                 String line = profileReader.nextLine();
                 lines.add(line);
-                if (line.startsWith("whitelist $")) {
+                if (line.startsWith("whitelist ${HOME}")) {
                     hasWhitelist = true;
                 }
             }

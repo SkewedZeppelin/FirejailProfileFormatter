@@ -25,7 +25,7 @@ public class MainN {
             while (profileReader.hasNext()) {
                 String line = profileReader.nextLine();
                 lines.add(line);
-                if (line.equals("nodvd")) {
+                if (line.equals("apparmor")) {
                     hasOpt = true;
                 }
             }
@@ -39,12 +39,12 @@ public class MainN {
                 PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
                 for (String s : lines) {
                     if (!added) {
-                        if (s.startsWith("nogroups") || s.startsWith("nonewprivs") || s.startsWith("noroot") || s.startsWith("nosound") || s.startsWith("notv")) {
-                            profileOut.println("nodvd");
+                        if (s.startsWith("caps.") || s.startsWith("netfilter") || s.startsWith("ipc-namespace")) {
+                            profileOut.println("apparmor");
                             added = true;
                         }
                     }
-                    if (!s.startsWith("nodvd")) {
+                    if (!s.startsWith("apparmor")) {
                         profileOut.println(s);
                     }
                 }
