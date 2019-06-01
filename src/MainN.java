@@ -7,8 +7,8 @@ import java.util.Scanner;
 
 public class MainN {
 
-    private static final File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
-    private static final File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
+    private static final File profiles = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
+    private static final File profilesNew = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
 
     public static void main(String[] args) {
         File[] allProfiles = profiles.listFiles();
@@ -25,7 +25,7 @@ public class MainN {
             while (profileReader.hasNext()) {
                 String line = profileReader.nextLine();
                 lines.add(line);
-                if (line.equals("apparmor")) {
+                if (line.equals("private-dev")) {
                     hasOpt = true;
                 }
             }
@@ -37,15 +37,17 @@ public class MainN {
                 String profileName = profileSplit[profileSplit.length - 1].replaceAll(".profile", "");
                 File profileNew = new File(profilesNew.getPath() + "/" + profileSplit[profileSplit.length - 1]);
                 PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
+                String lastLine = "";
                 for (String s : lines) {
                     if (!added) {
-                        if (s.startsWith("caps.") || s.startsWith("netfilter") || s.startsWith("ipc-namespace")) {
-                            profileOut.println("apparmor");
+                        if (lastLine.startsWith("notv") || s.startsWith("novideo")) {
+                            profileOut.println("nou2f");
                             added = true;
                         }
                     }
-                    if (!s.startsWith("apparmor")) {
+                    if (!s.startsWith("nou2f")) {
                         profileOut.println(s);
+                        lastLine = s;
                     }
                 }
                 if (!added) {

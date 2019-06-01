@@ -21,8 +21,8 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final File profiles = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
-    private static final File profilesNew = new File("/home/***REMOVED***/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
+    private static final File profiles = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
+    private static final File profilesNew = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
 
     public static void main(String[] args) {
         File[] allProfiles = profiles.listFiles();
@@ -54,11 +54,11 @@ public class Main {
                     quiet = true;
                 } else if (line.startsWith("blacklist") || line.startsWith("noblacklist")) {
                     profileNoBlacklist.add(line);
-                } else if (line.startsWith("include /etc/firejail/disable-") || line.startsWith("# include /etc/firejail/disable-")) {
+                } else if (line.startsWith("include disable-") || line.startsWith("# include disable-")) {
                     profileIncludes.add(line);
                 } else if (line.startsWith("mkfile") || line.startsWith("mkdir") || line.startsWith("whitelist")) {
                     profileWhitelist.add(line);
-                } else if (line.equals("include /etc/firejail/whitelist-common.inc")) {
+                } else if (line.equals("include whitelist-common.inc")) {
                     isWhitelist = true;
                 } else if (line.startsWith("private") || line.startsWith("disable-mnt") || line.startsWith("# private") || line.startsWith("read-")) {
                     profileOptionsPrivate.add(line);
@@ -88,7 +88,7 @@ public class Main {
             PrintWriter profileOut = new PrintWriter(profileNew, "UTF-8");
             //header XXX: VERIFY ALIAS HEADERS - grep "Firejail profile alias for" *.profile
             if (profileExtends.size() == 1 && !profileExtends.get(0).contains("default.profile") && !profileExtends.get(0).contains("electron.profile") && !profileExtends.get(0).contains("firefox.profile") && !(profileOptions.size() > 2)) {
-                String alias = profileExtends.get(0).split("/")[profileExtends.get(0).split("/").length - 1].split(".profile")[0];
+                String alias = profileExtends.get(0).split(".profile")[0];
                 profileOut.println("# Firejail profile alias for " + alias);
                 profileOut.println("# This file is overwritten after every install/update\n");
             } else {
@@ -98,9 +98,9 @@ public class Main {
                     profileOut.println("quiet");
                 }
                 profileOut.println("# Persistent local customizations");
-                profileOut.println("include /etc/firejail/" + profileName + ".local");
+                profileOut.println("include " + profileName + ".local");
                 profileOut.println("# Persistent global definitions");
-                profileOut.println("include /etc/firejail/globals.local\n");
+                profileOut.println("include globals.local\n");
             }
             //noblacklist
             if (profileNoBlacklist.size() > 0) {
@@ -130,7 +130,7 @@ public class Main {
                 isWhitelist = true;
             }
             if (isWhitelist) {
-                profileOut.println("include /etc/firejail/whitelist-common.inc");
+                profileOut.println("include whitelist-common.inc");
             }
             //options
             if (profileOptions.size() > 0) {
