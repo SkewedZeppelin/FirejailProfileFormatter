@@ -7,16 +7,27 @@ import java.util.Scanner;
 
 public class MainN {
 
-    private static final File profiles = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles");
-    private static final File profilesNew = new File("/home/tad/Development/Java/IntelliJ_Workspace/FirejailProfileFormatter/profiles-new");
+    private static File profiles = null;
+    private static File profilesNew = null;
 
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Please supply an absolute directory containing: profiles, profiles-new");
+            System.exit(1);
+        }
+        if(!args[0].endsWith("/")) {
+            args[0] += "/";
+        }
+        profiles = new File(args[0] + "profiles/");
+        profilesNew = new File(args[0] + "profiles-new/");
+
         File[] allProfiles = profiles.listFiles();
         for (File profile : allProfiles) {
             fix(profile);
         }
     }
 
+    //Sorts a new option
     private static void fix(File profile) {
         try {
             ArrayList<String> lines = new ArrayList<>();
