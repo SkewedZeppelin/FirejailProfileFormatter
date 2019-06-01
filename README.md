@@ -19,3 +19,8 @@ MainWNB
 ------
 This converts a profile to whitelist-noblacklist.
 wnb was a feature proposed in https://github.com/netblue30/firejail/issues/1569
+
+DescriptionGenerator
+------
+This gathers package descriptions from apt and pacman and adds it to a profile.
+This was used for https://github.com/netblue30/firejail/pull/2081
